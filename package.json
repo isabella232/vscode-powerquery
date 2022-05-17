@@ -183,6 +183,12 @@
                     "default": true,
                     "description": "Recommended always on. Toggles internal caching causing performance degregation when off. Used to find hot paths in the extension."
                 },
+                "powerquery.diagnostics.timeout": {
+                    "scope": "window",
+                    "type": "number",
+                    "default": 5000,
+                    "description": "The number of milliseconds that Intellisense can run before a cancellation request is raised."
+                },
                 "powerquery.benchmark.enable": {
                     "scope": "window",
                     "type": "boolean",

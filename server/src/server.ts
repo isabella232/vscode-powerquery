@@ -26,6 +26,7 @@ interface ServerSettings {
     locale: string;
     isBenchmarksEnabled: boolean;
     isWorkspaceCacheAllowed: boolean;
+    symbolProviderTimeoutInMs: number;
 }
 
 const defaultServerSettings: ServerSettings = {
@@ -34,6 +35,7 @@ const defaultServerSettings: ServerSettings = {
     locale: PQP.DefaultLocale,
     isBenchmarksEnabled: false,
     isWorkspaceCacheAllowed: true,
+    symbolProviderTimeoutInMs: 5000,
 };
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -312,6 +314,7 @@ function createAnalysisSettings(
         createInspectionSettingsFn: (): PQLS.InspectionSettings => createInspectionSettings(library, traceManager),
         library,
         isWorkspaceCacheAllowed: serverSettings.isWorkspaceCacheAllowed,
+        symbolProviderTimeoutInMS: serverSettings.symbolProviderTimeoutInMs,
     };
 }
 
@@ -417,6 +420,7 @@ async function fetchConfigurationSettings(): Promise<ServerSettings> {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: any = await connection.workspace.getConfiguration({ section: "powerquery" });
+    const symbolProviderTimeoutInMs: number = config?.diagnostics?.symbolProviderTimeoutInMs;
 
     return {
         checkForDuplicateIdentifiers: true,
@@ -424,6 +428,10 @@ async function fetchConfigurationSettings(): Promise<ServerSettings> {
         locale: config?.general?.locale ?? PQP.DefaultLocale,
         isBenchmarksEnabled: config?.benchmark?.enable ?? false,
         isWorkspaceCacheAllowed: config?.diagnostics?.isWorkspaceCacheAllowed ?? true,
+        symbolProviderTimeoutInMs:
+            symbolProviderTimeoutInMs <= 0
+                ? defaultServerSettings.symbolProviderTimeoutInMs
+                : symbolProviderTimeoutInMs,
     };
 }
 
