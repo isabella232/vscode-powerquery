@@ -420,7 +420,6 @@ async function fetchConfigurationSettings(): Promise<ServerSettings> {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: any = await connection.workspace.getConfiguration({ section: "powerquery" });
-    const symbolProviderTimeoutInMs: number = config?.diagnostics?.symbolProviderTimeoutInMs;
 
     return {
         checkForDuplicateIdentifiers: true,
@@ -428,11 +427,16 @@ async function fetchConfigurationSettings(): Promise<ServerSettings> {
         locale: config?.general?.locale ?? PQP.DefaultLocale,
         isBenchmarksEnabled: config?.benchmark?.enable ?? false,
         isWorkspaceCacheAllowed: config?.diagnostics?.isWorkspaceCacheAllowed ?? true,
-        symbolProviderTimeoutInMs:
-            symbolProviderTimeoutInMs <= 0
-                ? defaultServerSettings.symbolProviderTimeoutInMs
-                : symbolProviderTimeoutInMs,
+        symbolProviderTimeoutInMs: fetchSymbolProviderTimeoutInMs(),
     };
+}
+
+function fetchSymbolProviderTimeoutInMs(): number {
+    if (serverSettings.symbolProviderTimeoutInMs <= 0) {
+        return Number.MAX_SAFE_INTEGER;
+    } else {
+        return serverSettings.symbolProviderTimeoutInMs;
+    }
 }
 
 function assertAsError<T>(value: T | Error): Error {
